@@ -1,5 +1,5 @@
-import app from '../backend/src/app.js'; // Adjust the path if necessary
-import connectDB from '../backend/src/db/index.js'; // Adjust the path if necessary
+import app from '../src/app.js'; // Adjust the path if necessary
+import connectDB from '../src/db/index.js'; // Adjust the path if necessary
 import pino from 'pino';
 
 const logging = pino();
