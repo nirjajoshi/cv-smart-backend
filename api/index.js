@@ -48,10 +48,6 @@ app.get("/api/v1", (req, res) => {
     res.send("API is working!");
 });
 
-// 404 Fallback for undefined routes
-app.use("*", (req, res) => {
-    res.status(404).json({ error: "Route not found" });
-});
 
 
 
