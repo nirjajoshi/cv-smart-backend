@@ -21,14 +21,14 @@ app.use(express.static("public"))
 app.use(cookieParser())
 
 //routes import 
-import userRouter from "./routes/user.routes.js"
-import jobDescriptionRouter from './routes/jobdescription.routes.js';
-import resumeRouter from './routes/resume.routes.js'
-import matchingroute from './routes/matchingjob.routes.js'
-import getuserid from './routes/userid.routes.js'
-import fileRoutes from './routes/file.route.js';
-import matchingCandidatesRoutes from './routes/matchingCandidates.routes.js'; 
-import updatejob from './routes/jobupdate.routes.js'
+import userRouter from "../src/routes/user.routes.js"
+import jobDescriptionRouter from '../src/routes/jobdescription.routes.js';
+import resumeRouter from '../src/routes/resume.routes.js'
+import matchingroute from '../src/routes/matchingjob.routes.js'
+import getuserid from '../src/routes/userid.routes.js'
+import fileRoutes from '../src/routes/file.route.js';
+import matchingCandidatesRoutes from '../src/routes/matchingCandidates.routes.js'; 
+import updatejob from '../src/routes/jobupdate.routes.js'
 
 
 
@@ -47,10 +47,6 @@ app.use('/api/v1', updatejob)
 app.get("/api/v1", (req, res) => {
     res.send("API is working!");
 });
-
-
-
-
 
 
 export default app
