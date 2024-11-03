@@ -13,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // API URL for fetching embeddings
-const renderApiUrl = 'https://cvsmart-flaskapp-1.onrender.com/get-embedding';
+const renderApiUrl = 'https://cvsmart-flaskapp.onrender.com/get-embedding';
 
 // Async handler for error handling
 export const asyncHandler = (fn) => (req, res, next) => {

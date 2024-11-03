@@ -43,7 +43,7 @@ const addResume = [
       const formData = new FormData();
       formData.append('file', fs.createReadStream(filePath));
 
-      const response = await axios.post('https://cvsmart-flaskapp-1.onrender.com/get-embedding', formData, {
+      const response = await axios.post('https://cvsmart-flaskapp.onrender.com/get-embedding', formData, {
         headers: { ...formData.getHeaders() },
       });
       const embeddings = response.data.embeddings[0];
