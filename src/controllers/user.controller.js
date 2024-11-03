@@ -14,6 +14,10 @@ const registerUser = asyncHandler(async(req,res) =>{
     return res.status(400).json({ message: 'Please provide all required fields.' });
   }
 
+  if ((role === 'candidate' || role === 'company') && !status) {
+    return res.status(400).json({ message: 'Status is required for candidates and companies.' });
+  }
+
   // Check if user already exists
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -26,7 +30,7 @@ const registerUser = asyncHandler(async(req,res) =>{
     password,
     fullname,
     role,
-    status
+    status : status || null
   });
 
   // Save user to database
