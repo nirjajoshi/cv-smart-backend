@@ -2,14 +2,8 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { User } from '../models/user.models.js';
 import { Resume } from '../models/resume.models.js'; // Import the Resume model
 import { uploadResume } from '../middlewares/resume.middleware.js'; // Import resume multer config
-import fs from 'fs';
-import path from 'path';
 import axios from 'axios';
 import FormData from 'form-data'; // Import FormData to handle multipart/form-data
-import cloudinary from '../utils/cloudinary.js'; // Import Cloudinary configuration
-
-// Define __dirname for ES modules
-const __dirname = path.resolve();
 
 const addResume = [
   uploadResume.single('file'),
@@ -28,20 +22,12 @@ const addResume = [
         return res.status(404).json({ error: 'User not found' });
       }
 
-      const filePath = path.join(file.destination, file.filename);
+      // Cloudinary URL from the uploaded file
+      const cloudinaryUrl = file.path;
 
-      // Upload file to Cloudinary
-      const cloudinaryResult = await cloudinary.uploader.upload(filePath, {
-        folder: 'resumes',
-        resource_type: 'raw',
-      });
-
-      // Manually construct the Cloudinary URL using the public ID
-      const cloudinaryUrl = `https://res.cloudinary.com/dcra1zgrv/raw/upload/${cloudinaryResult.public_id}`;
-
-      // Create FormData and append file for embedding
+      // Create FormData and append the Cloudinary URL for embedding
       const formData = new FormData();
-      formData.append('file', fs.createReadStream(filePath));
+      formData.append('file_url', cloudinaryUrl); // Assuming the endpoint accepts `file_url`
 
       const response = await axios.post('https://cvsmart-flaskapp.onrender.com/get-embedding', formData, {
         headers: { ...formData.getHeaders() },
