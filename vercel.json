@@ -13,8 +13,7 @@
     "functions": {
       "src/api/*.js": {
         "maxDuration": 300,       
-        "memory": 1024,          
-        "background": true       
+        "memory": 1024      
       }
     },
     "rewrites": [
