@@ -3,29 +3,25 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import cloudinary from '../utils/cloudinary.js';
 
 // Define __dirname for ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Create a base uploads directory
-const baseUploadsDir = path.join(__dirname, '..', 'uploads', 'resumes');
-
 // Function to ensure the base upload directory exists
-const ensureBaseDirectoryExists = () => {
-  if (!fs.existsSync(baseUploadsDir)) {
-    fs.mkdirSync(baseUploadsDir, { recursive: true });
-  }
-};
-
-// Create a unique subdirectory for each upload
-const createUniqueUploadDir = () => {
-  const timestamp = Date.now(); // Unique timestamp for folder name
-  const uploadDir = path.join(baseUploadsDir, `upload_${timestamp}`);
-  
-  fs.mkdirSync(uploadDir, { recursive: true }); // Create the unique upload directory
-  return uploadDir;
-};
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'resumes', // Folder in Cloudinary where resumes will be stored
+    format: async (req, file) => {
+      // Automatically set format based on file's mimetype (e.g., pdf, docx)
+      const ext = path.extname(file.originalname).slice(1);
+      return ext || 'pdf'; // Default to 'pdf' if extension not found
+    },
+    public_id: (req, file) => 'upload_' + Date.now(), // Unique identifier for each upload
+  },
+});
 
 // Allowed file types: PDF, DOC, DOCX
 const allowedMimeTypes = [
@@ -34,21 +30,9 @@ const allowedMimeTypes = [
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ];
 
-// Ensure the base directory exists when the module is loaded
-ensureBaseDirectoryExists();
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadDir = createUniqueUploadDir(); // Create and use a unique upload directory
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname); // Keep original filename with timestamp
-  },
-});
-
+// Configure multer with Cloudinary storage and file filter
 export const uploadResume = multer({
-  storage,
+  storage: storage,
   fileFilter: function (req, file, cb) {
     if (allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true);
