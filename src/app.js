@@ -21,7 +21,7 @@ app.use(express.static("public"))
 app.use(cookieParser())
 
 app.get("/", (req, res) => {
-    res.status(200).send("Hello From MN");
+    res.status(200).send("Hello From ");
 });
 
 //routes import 
