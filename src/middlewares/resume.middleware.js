@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import cloudinary from '../utils/cloudinary.js';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
 // Define __dirname for ES Modules
 const __filename = fileURLToPath(import.meta.url);
