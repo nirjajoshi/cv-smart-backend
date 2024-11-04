@@ -20,6 +20,10 @@ app.use (express.urlencoded({extended:true,limit:"50mb"}))
 app.use(express.static("public"))
 app.use(cookieParser())
 
+app.get("/", (req, res) => {
+    res.status(200).send("Hello From MN");
+});
+
 //routes import 
 import userRouter from "./routes/user.routes.js"
 import jobDescriptionRouter from './routes/jobdescription.routes.js';
@@ -41,6 +45,8 @@ app.use("/api/v1/userid",getuserid)
 app.use('/api/v1/', fileRoutes)
 app.use('/api/v1', matchingCandidatesRoutes)
 app.use('/api/v1', updatejob)
+
+
 
 
 
