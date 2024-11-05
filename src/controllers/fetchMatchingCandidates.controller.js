@@ -21,19 +21,20 @@ export const fetchMatchingCandidates = async (commonId, userId) => {
         }
 
         const jobEmbeddings = jobResult.embeddings;
+        console.log('Job Embeddings:', jobEmbeddings);
         if (!Array.isArray(jobEmbeddings) || jobEmbeddings.length === 0) {
             return { message: 'Job description embeddings are invalid' };
         }
 
         // Fetch all resumes from MongoDB
         const resumeResults = await Resume.find({});
-
         console.log('Resume results:', resumeResults);
 
         // Calculate similarity and filter matched candidates
         const matchedCandidates = resumeResults
             .map((resume) => {
                 const resumeEmbeddings = resume.embeddings;
+                console.log('Resume ID:', resume._id, 'Embeddings:', resumeEmbeddings);
                 if (!Array.isArray(resumeEmbeddings) || resumeEmbeddings.length === 0) {
                     return null; // Skip invalid resume embeddings
                 }
@@ -58,24 +59,24 @@ export const fetchMatchingCandidates = async (commonId, userId) => {
         const finalResults = await Promise.all(
             matchedCandidates.map(async (candidate) => {
                 const candidateInfo = await User.findById(candidate.userId).select('status email fullname');
-                
-                // Log the candidate info
                 console.log('Candidate ID:', candidate.userId, 'Info:', candidateInfo);
+                
+                if (!candidateInfo) {
+                    console.warn('No user found for userId:', candidate.userId);
+                }
 
                 return {
                     id: candidate.id,
                     cloudinaryUrl: candidate.cloudinaryUrl,
                     status: candidateInfo ? candidateInfo.status : 'Unknown',
                     email: candidateInfo ? candidateInfo.email : 'Unknown',
-                    fullName: candidateInfo ? candidateInfo.fullname : 'Unknown' // Ensure matching with your User model
+                    fullName: candidateInfo ? candidateInfo.fullname : 'Unknown'
                 };
             })
         );
 
         // Filter out any null results from Promise.all
         const filteredResults = finalResults.filter(Boolean);
-
-        // Log final results
         console.log('Final Results:', filteredResults);
         return filteredResults;
 
