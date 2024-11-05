@@ -1,19 +1,12 @@
 import { upload } from '../middlewares/multer.middleware.js'; // Middleware for file uploads
 import { User } from '../models/user.models.js'; // User model
 import JobDescription from '../models/jobdescription.models.js'; // Job Description model
-import fs from 'fs';
-import path from 'path';
 import cloudinary from '../utils/cloudinary.js'; // Cloudinary utility
 import axios from 'axios'; // Axios for HTTP requests
 import FormData from 'form-data'; // FormData for multipart/form-data requests
-import { fileURLToPath } from 'url';
-
-// Get the current directory name
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // API URL for fetching embeddings
-const renderApiUrl = 'https://cvsmart-flaskapp.onrender.com/get-embedding';
+const renderApiUrl = 'http://localhost:5000/get-embedding';
 
 // Async handler for error handling
 export const asyncHandler = (fn) => (req, res, next) => {
@@ -39,17 +32,22 @@ export const addJobDescription = [
         return res.status(404).json({ error: 'User not found.' });
       }
 
-      // Set file path for local storage
-      const filePath = path.join(__dirname, '..', 'uploads', 'job_descriptions', file.filename);
-      let cloudinaryUrl;
-
       // Upload file to Cloudinary
+      let cloudinaryUrl;
       try {
-        const cloudinaryResult = await cloudinary.uploader.upload(filePath, {
+        const cloudinaryResult = await cloudinary.uploader.upload_stream({
           folder: 'job_descriptions',
           resource_type: 'auto',
+        }, (error, result) => {
+          if (error) {
+            throw new Error('Cloudinary upload error: ' + error.message);
+          }
+          cloudinaryUrl = result.secure_url;
         });
-        cloudinaryUrl = cloudinaryResult.secure_url;
+
+        // Create a stream and pipe the file to Cloudinary
+        const stream = cloudinary.uploader.upload_stream(cloudinaryUrl);
+        stream.end(file.buffer);
       } catch (err) {
         console.error('Cloudinary upload error:', err);
         return res.status(500).json({ error: 'Error uploading file to Cloudinary.', details: err.message });
@@ -57,7 +55,7 @@ export const addJobDescription = [
 
       // Prepare to send the uploaded file to get embeddings
       const formData = new FormData();
-      formData.append('file', fs.createReadStream(filePath));
+      formData.append('file', file.buffer, file.originalname); // Pass the buffer directly
 
       // Fetch embeddings
       let embeddings;
@@ -74,9 +72,6 @@ export const addJobDescription = [
         console.error('Error fetching embeddings from Flask:', err);
         return res.status(500).json({ error: 'Error fetching embeddings from Flask.', details: err.message });
       }
-
-      // Clean up local file after upload
-      fs.unlinkSync(filePath);
 
       // Document to be saved or updated
       const doc = {

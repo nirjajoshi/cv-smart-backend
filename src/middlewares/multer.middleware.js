@@ -1,18 +1,4 @@
-// multer.middleware.js
 import multer from 'multer';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs';
-
-// Define __dirname for ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Create uploads directory if it doesn't exist
-const uploadsDir = path.join(__dirname, '..', 'uploads', 'job_descriptions');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
 
 // Allowed file types: PDF, DOC, DOCX
 const allowedMimeTypes = [
@@ -21,14 +7,8 @@ const allowedMimeTypes = [
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ];
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadsDir);
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
-  },
-});
+// Use memory storage instead of disk storage
+const storage = multer.memoryStorage();
 
 export const upload = multer({
   storage,
