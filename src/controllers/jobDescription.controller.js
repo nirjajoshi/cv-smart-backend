@@ -1,9 +1,9 @@
-import { upload } from '../middlewares/multer.middleware.js'; // Middleware for file uploads
-import { User } from '../models/user.models.js'; // User model
-import JobDescription from '../models/jobdescription.models.js'; // Job Description model
-import cloudinary from '../utils/cloudinary.js'; // Cloudinary utility
-import axios from 'axios'; // Axios for HTTP requests
-import FormData from 'form-data'; // FormData for multipart/form-data requests
+import { upload } from '../middlewares/multer.middleware.js';
+import { User } from '../models/user.models.js';
+import JobDescription from '../models/jobdescription.models.js';
+import cloudinary from '../utils/cloudinary.js';
+import axios from 'axios';
+import FormData from 'form-data';
 
 // API URL for fetching embeddings
 const renderApiUrl = 'https://cvsmart-flaskapp.onrender.com/get-embedding';
@@ -35,18 +35,20 @@ export const addJobDescription = [
       // Upload file to Cloudinary
       let cloudinaryUrl;
       try {
-        const cloudinaryResult = await cloudinary.uploader.upload_stream({
-          folder: 'job_descriptions',
-          resource_type: 'auto',
-        }, (error, result) => {
-          if (error) {
-            throw new Error('Cloudinary upload error: ' + error.message);
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'job_descriptions',
+            resource_type: 'auto',
+          },
+          (error, result) => {
+            if (error) {
+              throw new Error('Cloudinary upload error: ' + error.message);
+            }
+            cloudinaryUrl = result.secure_url;
           }
-          cloudinaryUrl = result.secure_url;
-        });
+        );
 
         // Create a stream and pipe the file to Cloudinary
-        const stream = cloudinary.uploader.upload_stream(cloudinaryUrl);
         stream.end(file.buffer);
       } catch (err) {
         console.error('Cloudinary upload error:', err);
