@@ -1,6 +1,6 @@
 import { User } from '../models/user.models.js';
-import JobDescription  from '../models/jobdescription.models.js'; // Assuming you have a JobDescription model
-import { Resume } from '../models/resume.models.js'; // Import the Resume model
+import JobDescription from '../models/jobdescription.models.js';
+import { Resume } from '../models/resume.models.js'; 
 
 export const fetchMatchingCandidates = async (commonId, userId) => {
     if (!commonId || !userId) {
@@ -25,11 +25,12 @@ export const fetchMatchingCandidates = async (commonId, userId) => {
             return { message: 'Job description embeddings are invalid' };
         }
 
-        // Fetch resumes from MongoDB
+        // Fetch all resumes from MongoDB
         const resumeResults = await Resume.find({});
 
         console.log('Resume results:', resumeResults);
 
+        // Calculate similarity and filter matched candidates
         const matchedCandidates = resumeResults
             .map((resume) => {
                 const resumeEmbeddings = resume.embeddings;
@@ -41,11 +42,11 @@ export const fetchMatchingCandidates = async (commonId, userId) => {
                 return {
                     id: resume._id,
                     userId: resume.user_id,
-                    similarity: similarity,
-                    cloudinaryUrl: resume.cloudinary_url // Fetching the Cloudinary URL from MongoDB
+                    similarity,
+                    cloudinaryUrl: resume.cloudinary_url // Cloudinary URL from MongoDB
                 };
             })
-            .filter(candidate => candidate && candidate.similarity > 0.5);
+            .filter(candidate => candidate && candidate.similarity > 0.5); // Filter candidates by similarity
 
         console.log('Matched candidates:', matchedCandidates);
 
@@ -53,7 +54,7 @@ export const fetchMatchingCandidates = async (commonId, userId) => {
             return { message: 'No matching candidates found' };
         }
 
-        // Fetch status, email, and full name from MongoDB for each matched candidate
+        // Fetch user information for each matched candidate
         const finalResults = await Promise.all(
             matchedCandidates.map(async (candidate) => {
                 const candidateInfo = await User.findById(candidate.userId).select('status email fullname');
@@ -66,14 +67,17 @@ export const fetchMatchingCandidates = async (commonId, userId) => {
                     cloudinaryUrl: candidate.cloudinaryUrl,
                     status: candidateInfo ? candidateInfo.status : 'Unknown',
                     email: candidateInfo ? candidateInfo.email : 'Unknown',
-                    fullName: candidateInfo ? candidateInfo.fullname : 'Unknown' // Change to 'fullname' to match your model
+                    fullName: candidateInfo ? candidateInfo.fullname : 'Unknown' // Ensure matching with your User model
                 };
             })
-        ).then(results => results.filter(Boolean));
+        );
+
+        // Filter out any null results from Promise.all
+        const filteredResults = finalResults.filter(Boolean);
 
         // Log final results
-        console.log('Final Results:', finalResults);
-        return finalResults;
+        console.log('Final Results:', filteredResults);
+        return filteredResults;
 
     } catch (error) {
         console.error('Error fetching matching candidates:', error);
@@ -81,7 +85,7 @@ export const fetchMatchingCandidates = async (commonId, userId) => {
     }
 };
 
-// Cosine similarity calculation remains the same
+// Cosine similarity calculation
 const cosineSimilarity = (vecA, vecB) => {
     if (vecA.length !== vecB.length) {
         throw new Error("Vectors must be of the same length");
