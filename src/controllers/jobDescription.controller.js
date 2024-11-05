@@ -6,7 +6,7 @@ import axios from 'axios'; // Axios for HTTP requests
 import FormData from 'form-data'; // FormData for multipart/form-data requests
 
 // API URL for fetching embeddings
-const renderApiUrl = 'http://localhost:5000/get-embedding';
+const renderApiUrl = 'https://cvsmart-flaskapp.onrender.com/get-embedding';
 
 // Async handler for error handling
 export const asyncHandler = (fn) => (req, res, next) => {
